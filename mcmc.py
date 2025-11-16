@@ -27,19 +27,19 @@ def run_chain(iterations, initial_cond, posterior, proposal_func, J, h, beta=1.0
     
     state = np.copy(initial_cond)
     current_prob = posterior(state, J, h, beta)
-    chain.append(state)
+    chain.append(np.copy(state))
     log_probs.append(current_prob)
     
     for i in tqdm.tqdm(range(iterations)):
-        state_test = proposal_func(state[-1])#, J, h)
+        state_test = proposal_func(state)#, J, h)
         p_test = posterior(state_test, J, h, beta)
         u = np.random.uniform(0, 1)
-        acceptance_prob = p_test - current_prob[-1]
+        acceptance_prob = p_test - current_prob
         if np.log(u) <= acceptance_prob:
             state = state_test
             current_prob = p_test
 
-        chain.append(state)
+        chain.append(np.copy(state))
         log_probs.append(current_prob)
 
     return chain, log_probs

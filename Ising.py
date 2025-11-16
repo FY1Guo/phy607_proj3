@@ -1,17 +1,15 @@
 import numpy as np
 
 
+def neighbor_sum(grid):
+    sum = np.roll(grid, 1, axis=0) + np.roll(grid, -1, axis=0) + np.roll(grid, 1, axis=1) + np.roll(grid, -1, axis=1)
+    return sum
+
+
 def ising_energy(grid, J, h):
-    left_shift = shift_left(grid)
-    right_shift = shift_right(grid)
-    up_shift = shift_up(grid)
-    down_shift = shift_down(grid)
-    # Divide by two because this double-counts the pairs of neighbors.
-    interactions = 0.5 * np.sum(
-        left_shift * grid + right_shift * grid + up_shift * grid + down_shift * grid
-    )
+    interaction = np.sum(grid * neighbor_sum(grid)) / 2  # each pair counted twice
     background = np.sum(grid)
-    total_energy = -J * interaction - h * grid
+    total_energy = -J * interaction - h * background
     return total_energy
 
 
@@ -24,25 +22,32 @@ def list_to_grid(array):
     return np.reshape(array, (N, N))
 
 
-def shift_down(grid):
-    N = grid.shape[0]
-    last_row = np.reshape(grid[-1, :], (1, N))
-    return np.append(last_row, grid[:-1, :], axis=0)
+def magnetization(grid):
+    return np.sum(grid) / grid.size
+
+def energy_per_spin(grid, J, h):
+    return ising_energy(grid, J, h) / grid.size
 
 
-def shift_up(grid):
-    N = grid.shape[0]
-    first_row = np.reshape(grid[0, :], (1, N))
-    return np.append(grid[1:, :], first_row, axis=0)
+# def shift_down(grid):
+#     N = grid.shape[0]
+#     last_row = np.reshape(grid[-1, :], (1, N))
+#     return np.append(last_row, grid[:-1, :], axis=0)
 
 
-def shift_left(grid):
-    N = grid.shape[0]
-    first_col = np.reshape(grid[:, 0], (N, 1))
-    return np.append(grid[:, 1:], first_col, axis=1)
+# def shift_up(grid):
+#     N = grid.shape[0]
+#     first_row = np.reshape(grid[0, :], (1, N))
+#     return np.append(grid[1:, :], first_row, axis=0)
 
 
-def shift_right(grid):
-    N = grid.shape[0]
-    last_col = np.reshape(grid[:, -1], (N, 1))
-    return np.append(last_col, grid[:, :-1], axis=1)
+# def shift_left(grid):
+#     N = grid.shape[0]
+#     first_col = np.reshape(grid[:, 0], (N, 1))
+#     return np.append(grid[:, 1:], first_col, axis=1)
+
+
+# def shift_right(grid):
+#     N = grid.shape[0]
+#     last_col = np.reshape(grid[:, -1], (N, 1))
+#     return np.append(last_col, grid[:, :-1], axis=1)
