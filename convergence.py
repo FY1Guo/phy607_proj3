@@ -23,5 +23,14 @@ def gelman_rubin(chains):
 
     B = n_samples / (n_chains - 1)*np.sum((chain_means - overall_mean)**2) #this is the between chain var
 
-    
+    #within chain variance
+    chain_variances = np.var(chains, axis=1, ddof = 1)
+
+    W = np.mean(chain_variances)
+
+    var_plus = ((n_samples - 1) / n_samples) * W * (1 / n_samples) * B
+
+    R_hat = np.sqrt(var_plus / W)
+
+    return R_hat
 
