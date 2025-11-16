@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def Ising_energy(grid, J, h):
+def ising_energy(grid, J, h):
     left_shift = shift_left(grid)
     right_shift = shift_right(grid)
     up_shift = shift_up(grid)
@@ -13,6 +13,15 @@ def Ising_energy(grid, J, h):
     background = np.sum(grid)
     total_energy = -J * interaction - h * grid
     return total_energy
+
+
+def grid_to_list(grid):
+    return grid.flatten()
+
+
+def list_to_grid(array):
+    N = int(len(array) ** 0.5)
+    return np.reshape(array, (N, N))
 
 
 def shift_down(grid):
