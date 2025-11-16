@@ -61,3 +61,55 @@ def direct_autocorr(chain, max_lag=None):
     
     return tau_estimate, rho
 
+def plot_trace(chains_dict, param_names=None, save_path=None, 
+               true_values=None, burn_in=None):
+
+    if param_names is None:
+        param_names = list(chains_dict.keys())
+    
+    n_params = len(param_names)
+    fig, axes = plt.subplots(n_params, 1, figsize=(12, 3 * n_params))
+    
+    if n_params == 1:
+        axes = [axes]
+    
+    for idx, param in enumerate(param_names):
+        chains = chains_dict[param]
+        ax = axes[idx]
+        
+        
+        if isinstance(chains, np.ndarray):
+            if chains.ndim == 1:
+                chains = [chains]
+            else:
+                chains = [chains[i] for i in range(chains.shape[0])]
+        
+       
+        for i, chain in enumerate(chains):
+            iterations = np.arange(len(chain))
+            ax.plot(iterations, chain, alpha=0.6, linewidth=0.8, 
+                   label=f'Chain {i+1}')
+        
+       
+        if burn_in is not None:
+            ax.axvline(burn_in, color='red', linestyle='--', 
+                      alpha=0.5, linewidth=2, label='Burn-in')
+        
+       
+        if true_values is not None and param in true_values:
+            ax.axhline(true_values[param], color='green', 
+                      linestyle='--', linewidth=2, alpha=0.7,
+                      label=f'True {param}')
+        
+        ax.set_ylabel(param, fontsize=12)
+        ax.set_xlabel('Iteration', fontsize=12)
+        ax.set_title(f'Trace Plot: {param}', fontsize=13, fontweight='bold')
+        ax.legend(loc='best')
+        ax.grid(True, alpha=0.3)
+    
+    plt.tight_layout()
+    
+    if save_path:
+        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+    
+    return fig
