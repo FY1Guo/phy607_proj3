@@ -15,4 +15,13 @@ def gelman_rubin(chains):
     if chains.ndim == 1:
         raise ValueError("More than 2 chains required for R_hat")
     
+    n_chains = chains.shape[0]
+    n_samples = chains.shape[1]
+
+    chain_means = np.mean(chains, axis=1)
+    overall_mean = np.mean(chain_means)
+
+    B = n_samples / (n_chains - 1)*np.sum((chain_means - overall_mean)**2) #this is the between chain var
+
     
+
