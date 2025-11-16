@@ -1,25 +1,45 @@
 import numpy as np
-import tdqm
+import tqdm
 
 from Ising import ising_energy, grid_to_list, list_to_grid
 
-def posterior(state, J, h) #Maybe takes other parameters?)
-    return
 
-def run_chain(iterations, initial_cond, posterior, proposal_func, J, h):
+def posterior(state, J, h, beta=1.0): #Maybe takes other parameters?)
+    E = ising_energy(state, J, h)
+    return -beta * E
+
+
+def proposal_func(state): 
+    """
+    Propose a new state by flipping a random spin in the grid.
+    """
+    grid = np.copy(state)
+    N = grid.shape[0]
+    i = np.random.randint(0, N)
+    j = np.random.randint(0, N)
+    grid[i, j] *= -1
+    return grid
+
+
+def run_chain(iterations, initial_cond, posterior, proposal_func, J, h, beta=1.0):
     chain = []
-    probabilities = []
+    log_probs = []
     
     state = np.copy(initial_cond)
-    initial_prob = posterior(initial_cond)
-    probabilities.append(initial_prob)
+    current_prob = posterior(state, J, h, beta)
+    chain.append(state)
+    log_probs.append(current_prob)
     
-    for i in tdqm.tdqm(range(iterations)):
+    for i in tqdm.tqdm(range(iterations)):
         state_test = proposal_func(state[-1])#, J, h)
-        p_test = posterior(state_test)
-        u = np.random.uniform(0,1)
-        acceptance_prob = p_test - p_list[-1]
+        p_test = posterior(state_test, J, h, beta)
+        u = np.random.uniform(0, 1)
+        acceptance_prob = p_test - current_prob[-1]
         if np.log(u) <= acceptance_prob:
-            chain.append(state_test)
-            p_list.append(p_test)
-    return chain_list, p_list
+            state = state_test
+            current_prob = p_test
+
+        chain.append(state)
+        log_probs.append(current_prob)
+
+    return chain, log_probs
