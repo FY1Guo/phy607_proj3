@@ -6,10 +6,12 @@ def Ising_energy(grid, J, h):
     right_shift = shift_right(grid)
     up_shift = shift_up(grid)
     down_shift = shift_down(grid)
-    
-    interactions = 0.5*np.sum(left_shift * grid + right_shift * grid + up_shift * grid + down_shift * grid)
+    # Divide by two because this double-counts the pairs of neighbors.
+    interactions = 0.5 * np.sum(
+        left_shift * grid + right_shift * grid + up_shift * grid + down_shift * grid
+    )
     background = np.sum(grid)
-    total_energy = -J*interaction - h*grid
+    total_energy = -J * interaction - h * grid
     return total_energy
 
 
