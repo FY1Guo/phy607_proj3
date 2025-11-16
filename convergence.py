@@ -34,3 +34,30 @@ def gelman_rubin(chains):
 
     return R_hat
 
+def direct_autocorr(chain, max_lag=None):
+    # first half is burn-in
+    chain = chain[len(chain)//2:]
+    
+    n = len(chain)
+    if max_lag is None:
+        max_lag = n // 10  
+    
+    
+    y = chain - np.mean(chain)
+    
+    
+    c = np.correlate(y, y, mode='full')
+    c = c[n-1 : n-1+max_lag]  
+    rho = c / c[0]  #normalize so rho[0] is 1.0
+    
+
+    negative_indices = np.where(rho < 0)[0]
+    if len(negative_indices) > 0:
+        cutoff = negative_indices[0]
+    else:
+        cutoff = len(rho)
+    
+    tau_estimate = 1.0 + 2.0 * np.sum(rho[1:cutoff])
+    
+    return tau_estimate, rho
+
