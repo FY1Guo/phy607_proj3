@@ -51,12 +51,14 @@ def run_simulation(N, beta=1.0, J=1.0, h=0.0, iterations=10000, burn_frac=0.5, s
     plt.close()
 
 
-def temperature_scan(N, betas, J=1.0, h=0.0, iterations=10000, seed=456):
+def temperature_scan(N, beta_min, beta_max, J=1.0, h=0.0, iterations=10000, seed=456):
     avg_mags = []
     avg_energies = []
 
+    rng = np.random.default_rng(seed)
+    betas = np.linspace(beta_min, beta_max, 10)
+
     for beta in betas:
-        rng = np.random.default_rng(seed)
         init_grid = rng.choice([-1, 1], size=(N, N))
 
         chain_m, logp_m = run_chain(iterations, init_grid, posterior, proposal_func, J, h, beta)
@@ -69,11 +71,32 @@ def temperature_scan(N, betas, J=1.0, h=0.0, iterations=10000, seed=456):
         avg_mags.append(np.mean(np.abs(mags_m)))
         avg_energies.append(np.mean(energies_m))
 
-    return np.array(avg_mags), np.array(avg_energies)
+    mags_res = np.array(avg_mags)
+    energies_res = np.array(avg_energies)
+
+    plt.figure()
+    plt.plot(betas, mags_res, marker="o")
+    plt.xlabel(r"$\beta$")
+    plt.ylabel(r"$\langle |m| \rangle$")
+    plt.title("Average Magnetization vs Beta")
+    plt.tight_layout()
+    plt.savefig("mag_vs_beta.png", dpi=200, bbox_inches="tight")
+    plt.close()
+
+    plt.figure()
+    plt.plot(betas, energies_res, marker="o")
+    plt.xlabel(r"$\beta$")
+    plt.ylabel(r"$\langle e \rangle$")
+    plt.title("Average Energy per Spin vs Beta")
+    plt.tight_layout()
+    plt.savefig("energy_vs_beta.png", dpi=200, bbox_inches="tight")
+    plt.close()
 
 
 
 if __name__ == "__main__":
-    run_simulation(N=50, beta=1.0, J=1.0, h=0.0, iterations=20000, burn_frac=0.5, seed=123)
+    #run_simulation(N=50, beta=1.0, J=1.0, h=0.0, iterations=300000, burn_frac=0.2, seed=123)
+    temperature_scan(N=20, beta_min=0.1, beta_max=1.0, J=1.0, h=0.0, iterations=100000, seed=456)
+
 
     
