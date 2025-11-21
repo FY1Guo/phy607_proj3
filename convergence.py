@@ -137,3 +137,24 @@ def mag_trace_plot(chain, burn_frac=0, save_path=None, label=None, title=None):
         plt.close()
 
     return mags
+
+def spin_up_probability(chains, spin_num = 0):
+    """
+    Given an ensemble of chains, plot the ratio of spin up to spin down for a given spin over time
+    """
+    min_length = np.inf
+    N_chains = len(chains)
+    for chain in chains:
+        if len(chain)<min_length:
+            min_length = len(chain)
+    spin_array = np.ones((N_chains, min_length))
+    for i in range(min_length):
+        for j, chain in enumerate(chains):
+            spin_array[j,i] = chain[i][spin_num]
+    plt.figure()
+    plt.plot(np.sum(spin_array, axis = 0))
+    plt.xlabel("MC step")
+    plt.ylabel("Net spin over all chains")
+    plt.title(f"Spin number {spin_num}")
+
+
