@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from mcmc import run_chain, posterior, proposal_func
+from mcmc import *
 from Ising import magnetization, energy_per_spin
 
 
@@ -23,6 +23,7 @@ def run_simulation(N, beta=1.0, J=1.0, h=0.0, iterations=10000, burn_frac=0.5, s
 
     plot_grid(init_grid, f"Initial configuration (N={N})", "grid_initial.png")
 
+    #chain_m, logp_m = run_chain(iterations, init_grid, posterior, lambda x: proposal_func_single_fractional(), J, h, beta)
     chain_m, logp_m = run_chain(iterations, init_grid, posterior, proposal_func, J, h, beta)
 
     burn_m = int(iterations * burn_frac)
@@ -39,7 +40,7 @@ def run_simulation(N, beta=1.0, J=1.0, h=0.0, iterations=10000, burn_frac=0.5, s
     plt.title("Magnetization trace (MCMC)")
     plt.tight_layout()
     plt.savefig("magnetization_trace_mcmc.png", dpi=200, bbox_inches="tight")
-    plt.close()
+    #plt.close()
 
     plt.figure()
     plt.plot(energies_m)
@@ -48,7 +49,9 @@ def run_simulation(N, beta=1.0, J=1.0, h=0.0, iterations=10000, burn_frac=0.5, s
     plt.title("Energy trace (MCMC)")
     plt.tight_layout()
     plt.savefig("energy_trace_mcmc.png", dpi=200, bbox_inches="tight")
-    plt.close()
+    #plt.close()
+    
+    plt.show()
 
 
 def temperature_scan(N, beta_min, beta_max, J=1.0, h=0.0, iterations=10000, seed=456):
