@@ -110,5 +110,38 @@ def exact_observables(N, beta, J, h):
     
     return results
 
+def plot_exact_vs_mcmc(exact_mags, exact_probs, mcmc_mags, 
+                       beta, J, h, save_path='comparison.png'):
 
+    
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+    
+    #exact distribution (bar plot)
+    ax1.bar(exact_mags, exact_probs, width=0.05, alpha=0.7, 
+            color='blue', edgecolor='black', label='Exact')
+    ax1.set_xlabel('Magnetization per spin', fontsize=12)
+    ax1.set_ylabel('Probability', fontsize=12)
+    ax1.set_title(f'Exact Distribution\nβ={beta:.2f}, J={J:.2f}, h={h:.2f}', 
+                  fontsize=13, fontweight='bold')
+    ax1.grid(True, alpha=0.3)
+    ax1.legend()
+    
+    #NCMC histogram
+    ax2.hist(mcmc_mags, bins=30, density=True, alpha=0.6, 
+             color='red', edgecolor='black', label='MCMC')
+    #exact as line
+    ax2.plot(exact_mags, exact_probs, 'bo-', linewidth=2, 
+             markersize=8, label='Exact', alpha=0.8)
+    ax2.set_xlabel('Magnetization per spin', fontsize=12)
+    ax2.set_ylabel('Probability Density', fontsize=12)
+    ax2.set_title(f'MCMC vs Exact\n{len(mcmc_mags)} samples', 
+                  fontsize=13, fontweight='bold')
+    ax2.grid(True, alpha=0.3)
+    ax2.legend()
+    
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=300, bbox_inches='tight')
+    print(f"Saved comparison plot to {save_path}")
+    
+    return fig
 
