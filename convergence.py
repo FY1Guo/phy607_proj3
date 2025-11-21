@@ -1,6 +1,6 @@
 """ This module is to verify convergence in the mcmc chain."""
 
-import Ising
+from Ising import magnetization
 import mcmc
 import numpy as np
 import matplotlib.pyplot as plt
@@ -113,3 +113,27 @@ def plot_trace(chains_dict, param_names=None, save_path=None,
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
     
     return fig
+
+
+def mag_trace_plot(chain, burn_frac=0, save_path=None, label=None, title=None):
+    """
+    Given a chain (list of grids), make a magnetization trace plot.
+    """
+    burn_in = int(len(chain) * burn_frac)
+    grids = chain[burn_in:]
+    mags = np.array([magnetization(g) for g in grids])
+
+    plt.figure()
+    plt.plot(mags, label=label if label is not None else None)
+    plt.xlabel("MC step")
+    plt.ylabel("Magnetization per spin")
+    if title is not None:
+        plt.title(title)
+    if label is not None:
+        plt.legend()
+    plt.tight_layout()
+    if save_path is not None:
+        plt.savefig(save_path, dpi=200, bbox_inches="tight")
+        plt.close()
+
+    return mags
