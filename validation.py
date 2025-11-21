@@ -24,7 +24,7 @@ def validate_small_grid(N=3, beta = 1.0, J = 1.0, h=0.0,
     print(f"MCMC iterations: {iterations}, burn-in: {burn_frac*100:.0f}%")
     print()
     
-    # Step 1: Compute exact solution
+    # cmputes exact solution
     print("Computing exact solution...")
     exact_mags, exact_probs, Z, _, _ = exact_distribution(N, beta, J, h)
     exact_obs = exact_observables(N, beta, J, h)
@@ -35,7 +35,7 @@ def validate_small_grid(N=3, beta = 1.0, J = 1.0, h=0.0,
     print(f"  Z = {exact_obs['Z']:.6e}")
     print()
     
-    # Step 2: Run MCMC
+    # runs MCMC
     print("Running MCMC...")
     rng = np.random.default_rng(seed)
     init_grid = rng.choice([-1, 1], size=(N, N))
@@ -44,7 +44,8 @@ def validate_small_grid(N=3, beta = 1.0, J = 1.0, h=0.0,
         iterations, init_grid, posterior, proposal_func_single, J, h, beta
     )
     
-    # Step 3: Extract observables from MCMC
+    #extract observables from MCMC
+    print("Printing observables")
     burn_in = int(iterations * burn_frac)
     chain_postburn = chain[burn_in:]
     
@@ -61,19 +62,17 @@ def validate_small_grid(N=3, beta = 1.0, J = 1.0, h=0.0,
     print(f"  <E>/N = {mcmc_mean_energy:.6f} ± {mcmc_std_energy/np.sqrt(len(mcmc_mags)):.6f}")
     print()
 
-    #STEP HERE FOR COMPARISON MAYBE
+    #STEP HERE FOR COMPARISON MAYBE?
 
-    #STEP 3: CONVERGENCE
-
-        # Step 5: Convergence diagnostics
+    #Connvergence
     print("Computing convergence diagnostics...")
     
-    # Full chain for autocorrelation (includes burn-in handling internally)
+    #Full chain for autocorrelation 
     all_mags = np.array([magnetization(g) for g in chain])
     tau, rho = direct_autocorr(all_mags)
     ess = len(all_mags) / tau
     
-    print(f"  Autocorrelation time: τ = {tau:.2f}")
+    print(f"  Autocorrelation time = {tau:.2f}")
     print(f"  Effective sample size: {ess:.0f} / {len(all_mags)}")
     print()
     
