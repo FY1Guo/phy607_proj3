@@ -24,7 +24,7 @@ def run_simulation(N, beta=1.0, J=1.0, h=0.0, iterations=10000, burn_frac=0.5, s
     plot_grid(init_grid, f"Initial configuration (N={N})", "grid_initial.png")
 
     #chain_m, logp_m = run_chain(iterations, init_grid, posterior, lambda x: proposal_func_single_fractional(), J, h, beta)
-    chain_m, logp_m = run_chain(iterations, init_grid, posterior, proposal_func, J, h, beta)
+    chain_m, logp_m = run_chain(iterations, init_grid, posterior, proposal_func_single, J, h, beta)
 
     burn_m = int(iterations * burn_frac)
     grids_m = chain_m[burn_m:]
@@ -54,20 +54,50 @@ def run_simulation(N, beta=1.0, J=1.0, h=0.0, iterations=10000, burn_frac=0.5, s
     plt.show()
 
 
+def plot_spin_snapshots(beta_list, grid_list, N, filename="ising_snapshots.png"):
+    """Plot one snapshot per beta in a grid layout."""
+
+    n = len(beta_list)
+    ncols = 5
+    nrows = int(np.ceil(n / ncols))
+
+    fig, axes = plt.subplots(nrows, ncols, figsize=(3*ncols, 3*nrows))
+
+    axes = axes.flatten()
+
+    for i, (beta, grid) in enumerate(zip(beta_list, grid_list)):
+        ax = axes[i]
+        ax.imshow(grid, cmap="viridis", interpolation="none")
+        ax.set_title(r"$\beta = %.2f$" % beta)
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+    # Turn off unused axes
+    for j in range(i+1, len(axes)):
+        axes[j].axis("off")
+
+    plt.tight_layout()
+    plt.savefig(filename, dpi=200, bbox_inches="tight")
+    plt.close()
+
+
 def temperature_scan(N, beta_min, beta_max, J=1.0, h=0.0, iterations=10000, seed=456):
     avg_mags = []
     avg_energies = []
 
     rng = np.random.default_rng(seed)
-    betas = np.linspace(beta_min, beta_max, 10)
+    betas = np.linspace(beta_min, beta_max, 20)
+
+    snapshot_grids = []
 
     for beta in betas:
         init_grid = rng.choice([-1, 1], size=(N, N))
 
-        chain_m, logp_m = run_chain(iterations, init_grid, posterior, proposal_func, J, h, beta)
+        chain_m, logp_m = run_chain(iterations, init_grid, posterior, proposal_func_single, J, h, beta)
 
         burn_m = iterations // 2
         grids_m = chain_m[burn_m:]
+        snapshot_grids.append(grids_m[-1])
         mags_m = np.array([magnetization(g) for g in grids_m])
         energies_m = np.array([energy_per_spin(g, J, h) for g in grids_m])
 
@@ -94,6 +124,8 @@ def temperature_scan(N, beta_min, beta_max, J=1.0, h=0.0, iterations=10000, seed
     plt.tight_layout()
     plt.savefig("energy_vs_beta.png", dpi=200, bbox_inches="tight")
     plt.close()
+
+    plot_spin_snapshots(betas, snapshot_grids, N, filename="ising_snapshots.png")
 
 
 
