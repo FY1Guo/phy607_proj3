@@ -1,9 +1,10 @@
 """ This module is to verify convergence in the mcmc chain."""
 
 from Ising import magnetization
-import mcmc
+from mcmc import *
 import numpy as np
 import matplotlib.pyplot as plt
+from Ising import *
 
 def gelman_rubin(chains):
     """
@@ -158,3 +159,70 @@ def spin_up_probability(chains, spin_num = 0):
     plt.title(f"Spin number {spin_num}")
 
 
+N = 10 
+beta = 0.3
+J = 1.0
+h = 1.0
+iterations = 20000
+burn_frac = 0.3
+
+print("Running 4 chains for Gelman-Rubin test...")
+chains_list = []
+mag_chains = []
+
+for i in range(4):
+    print(f"\nChain {i+1}/4...")
+    rng = np.random.default_rng(seed=100+i)
+    init_grid = rng.choice([-1, 1], size=(N, N))
+    
+    chain, _ = run_chain(iterations, init_grid, posterior, 
+                         proposal_func_single, J, h, beta)
+    
+    chains_list.append(chain)
+    
+    # Extract magnetization
+    mags = np.array([magnetization(g) for g in chain])
+    mag_chains.append(mags)
+
+# Gelman-Rubin test
+mag_chains_array = np.array(mag_chains)
+R_hat = gelman_rubin(mag_chains_array)
+
+print(f"\n{'='*60}")
+print(f"CONVERGENCE RESULTS")
+print(f"{'='*60}")
+print(f"Gelman-Rubin R-hat: {R_hat:.4f}")
+if R_hat < 1.1:
+    print("✓ CONVERGED (R-hat < 1.1)")
+else:
+    print("✗ NOT CONVERGED (R-hat >= 1.1)")
+
+# Autocorrelation analysis
+tau, rho = direct_autocorr(mag_chains[0])
+ess = len(mag_chains[0]) / tau
+
+print(f"\nAutocorrelation time (τ): {tau:.2f}")
+print(f"Effective Sample Size: {ess:.0f} / {len(mag_chains[0])}")
+print(f"{'='*60}\n")
+
+# Plot traces
+chains_dict = {'Magnetization': mag_chains}
+fig = plot_trace(chains_dict, burn_in=int(iterations*burn_frac))
+plt.savefig('convergence_traces.png', dpi=300, bbox_inches='tight')
+print("Saved: convergence_traces.png")
+
+# Plot ACF
+plt.figure(figsize=(10, 5))
+lags = np.arange(len(rho))
+plt.plot(lags, rho, linewidth=2)
+plt.axhline(0, color='black', linestyle='-', linewidth=0.5)
+plt.axhline(0.05, color='red', linestyle='--', alpha=0.5)
+plt.xlabel('Lag', fontsize=12)
+plt.ylabel('Autocorrelation', fontsize=12)
+plt.title(f'Magnetization ACF (τ={tau:.1f})', fontsize=13, fontweight='bold')
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.savefig('acf_plot.png', dpi=300, bbox_inches='tight')
+print("Saved: acf_plot.png")
+
+plt.show()
