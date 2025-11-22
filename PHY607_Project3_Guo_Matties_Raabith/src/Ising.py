@@ -2,7 +2,12 @@ import numpy as np
 
 
 def neighbor_sum(grid):
-    sum = np.roll(grid, 1, axis=0) + np.roll(grid, -1, axis=0) + np.roll(grid, 1, axis=1) + np.roll(grid, -1, axis=1)
+    sum = (
+        np.roll(grid, 1, axis=0)
+        + np.roll(grid, -1, axis=0)
+        + np.roll(grid, 1, axis=1)
+        + np.roll(grid, -1, axis=1)
+    )
     return sum
 
 
@@ -24,6 +29,7 @@ def list_to_grid(array):
 
 def magnetization(grid):
     return np.sum(grid) / grid.size
+
 
 def energy_per_spin(grid, J, h):
     return ising_energy(grid, J, h) / grid.size

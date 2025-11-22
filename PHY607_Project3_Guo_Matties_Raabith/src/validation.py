@@ -1,78 +1,80 @@
 """
 
-Compare MCMC with results to exact solution. 
+Compare MCMC with results to exact solution.
 
 """
 
-import numpy as np 
+import numpy as np
 
 import matplotlib.pyplot as plt
 
-from smallisingexact import * 
+from smallisingexact import *
 
 from mcmc import *
 from Ising import *
 from convergence import *
 
-def validate_small_grid(N=3, beta = 1.0, J = 1.0, h=0.0, 
-                        iterations = 50000, burn_frac=0.3, seed = 42):
 
-  
+def validate_small_grid(
+    N=3, beta=1.0, J=1.0, h=0.0, iterations=50000, burn_frac=0.3, seed=42
+):
+
     print(f"MCMC VALIDATION: {N}×{N} Ising Model")
-   
+
     print(f"Parameters: β={beta:.3f}, J={J:.3f}, h={h:.3f}")
     print(f"MCMC iterations: {iterations}, burn-in: {burn_frac*100:.0f}%")
     print()
-    
+
     # cmputes exact solution
     print("Computing exact solution...")
     exact_mags, exact_probs, Z, _, _ = exact_distribution(N, beta, J, h)
     exact_obs = exact_observables(N, beta, J, h)
-    
+
     print(f"\nExact Results:")
     print(f"  <|m|> = {exact_obs['mean_mag']:.6f}")
     print(f"  <E>/N = {exact_obs['mean_energy']:.6f}")
     print(f"  Z = {exact_obs['Z']:.6e}")
     print()
-    
+
     # runs MCMC
     print("Running MCMC...")
     rng = np.random.default_rng(seed)
     init_grid = rng.choice([-1, 1], size=(N, N))
-    
+
     chain, log_probs = run_chain(
         iterations, init_grid, posterior, proposal_func_single, J, h, beta
     )
-    
-    #extract observables from MCMC
+
+    # extract observables from MCMC
     print("Printing observables")
     burn_in = int(iterations * burn_frac)
     chain_postburn = chain[burn_in:]
-    
+
     mcmc_mags = np.array([magnetization(g) for g in chain_postburn])
     mcmc_energies = np.array([energy_per_spin(g, J, h) for g in chain_postburn])
-    
+
     mcmc_mean_mag = np.mean(np.abs(mcmc_mags))
     mcmc_mean_energy = np.mean(mcmc_energies)
     mcmc_std_mag = np.std(mcmc_mags)
     mcmc_std_energy = np.std(mcmc_energies)
-    
+
     print(f"\nMCMC Results ({len(mcmc_mags)} samples post-burn-in):")
     print(f"  <|m|> = {mcmc_mean_mag:.6f} ± {mcmc_std_mag/np.sqrt(len(mcmc_mags)):.6f}")
-    print(f"  <E>/N = {mcmc_mean_energy:.6f} ± {mcmc_std_energy/np.sqrt(len(mcmc_mags)):.6f}")
+    print(
+        f"  <E>/N = {mcmc_mean_energy:.6f} ± {mcmc_std_energy/np.sqrt(len(mcmc_mags)):.6f}"
+    )
     print()
 
-    #STEP HERE FOR COMPARISON MAYBE?
+    # STEP HERE FOR COMPARISON MAYBE?
 
-    #Connvergence
+    # Connvergence
     print("Computing convergence diagnostics...")
-    
-    #Full chain for autocorrelation 
+
+    # Full chain for autocorrelation
     all_mags = np.array([magnetization(g) for g in chain])
     tau, rho = direct_autocorr(all_mags)
     ess = len(all_mags) / tau
-    
+
     print(f"  Autocorrelation time = {tau:.2f}")
     print(f"  Effective sample size: {ess:.0f} / {len(all_mags)}")
     print()
-    

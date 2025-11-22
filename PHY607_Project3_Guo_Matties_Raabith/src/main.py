@@ -18,15 +18,26 @@ def plot_grid(grid, title, fname):
     plt.close()
 
 
-def run_simulation(N, beta=1.0, J=1.0, h=0.0, iterations=10000, emcee_walkers=20, burn_frac=0.5, seed=123):
+def run_simulation(
+    N,
+    beta=1.0,
+    J=1.0,
+    h=0.0,
+    iterations=10000,
+    emcee_walkers=20,
+    burn_frac=0.5,
+    seed=123,
+):
     rng = np.random.default_rng(seed)
     init_grid = rng.choice([-1, 1], size=(N, N))
 
     plot_grid(init_grid, f"Initial configuration (N={N})", "grid_initial.png")
 
     # ---------- MCMC ----------
-    #chain_m, logp_m = run_chain(iterations, init_grid, posterior, lambda x: proposal_func_single_fractional(), J, h, beta)
-    chain_m, logp_m = run_chain(iterations, init_grid, posterior, proposal_func_single, J, h, beta)
+    # chain_m, logp_m = run_chain(iterations, init_grid, posterior, lambda x: proposal_func_single_fractional(), J, h, beta)
+    chain_m, logp_m = run_chain(
+        iterations, init_grid, posterior, proposal_func_single, J, h, beta
+    )
 
     burn_m = int(iterations * burn_frac)
     grids_m = chain_m[burn_m:]
@@ -70,7 +81,7 @@ def run_simulation(N, beta=1.0, J=1.0, h=0.0, iterations=10000, emcee_walkers=20
     plt.legend()
     plt.tight_layout()
     plt.savefig("magnetization_trace_comp.png", dpi=200, bbox_inches="tight")
-    #plt.close()
+    # plt.close()
 
     plt.figure()
     plt.plot(energies_m, label="Metropolis")
@@ -81,8 +92,8 @@ def run_simulation(N, beta=1.0, J=1.0, h=0.0, iterations=10000, emcee_walkers=20
     plt.legend()
     plt.tight_layout()
     plt.savefig("energy_trace_comp.png", dpi=200, bbox_inches="tight")
-    #plt.close()
-    
+    # plt.close()
+
     plt.show()
 
 
@@ -93,7 +104,7 @@ def plot_spin_snapshots(beta_list, grid_list, N, filename="ising_snapshots.png")
     ncols = 5
     nrows = int(np.ceil(n / ncols))
 
-    fig, axes = plt.subplots(nrows, ncols, figsize=(3*ncols, 3*nrows))
+    fig, axes = plt.subplots(nrows, ncols, figsize=(3 * ncols, 3 * nrows))
 
     axes = axes.flatten()
 
@@ -105,7 +116,7 @@ def plot_spin_snapshots(beta_list, grid_list, N, filename="ising_snapshots.png")
         ax.set_yticks([])
 
     # Turn off unused axes
-    for j in range(i+1, len(axes)):
+    for j in range(i + 1, len(axes)):
         axes[j].axis("off")
 
     plt.tight_layout()
@@ -113,7 +124,9 @@ def plot_spin_snapshots(beta_list, grid_list, N, filename="ising_snapshots.png")
     plt.close()
 
 
-def temperature_scan(N, beta_min, beta_max, J=1.0, h=0.0, iterations=10000, emcee_walkers=20, seed=456):
+def temperature_scan(
+    N, beta_min, beta_max, J=1.0, h=0.0, iterations=10000, emcee_walkers=20, seed=456
+):
     avg_mags_m = []
     avg_energies_m = []
 
@@ -129,7 +142,9 @@ def temperature_scan(N, beta_min, beta_max, J=1.0, h=0.0, iterations=10000, emce
         # ---------- MCMC ----------
         init_grid = rng.choice([-1, 1], size=(N, N))
 
-        chain_m, logp_m = run_chain(iterations, init_grid, posterior, proposal_func_single, J, h, beta)
+        chain_m, logp_m = run_chain(
+            iterations, init_grid, posterior, proposal_func_single, J, h, beta
+        )
 
         burn_m = iterations // 2
         grids_m = chain_m[burn_m:]
@@ -163,7 +178,6 @@ def temperature_scan(N, beta_min, beta_max, J=1.0, h=0.0, iterations=10000, emce
             energies_e_samples.append(energy_per_spin(grid, J, h))
         avg_energies_e.append(np.mean(energies_e_samples))
 
-
     mags_res_m = np.array(avg_mags_m)
     energies_res_m = np.array(avg_energies_m)
     mags_res_e = np.array(avg_mags_e)
@@ -194,10 +208,8 @@ def temperature_scan(N, beta_min, beta_max, J=1.0, h=0.0, iterations=10000, emce
     plot_spin_snapshots(betas, snapshot_grids, N, filename="ising_snapshots.png")
 
 
-
 if __name__ == "__main__":
-    run_simulation(N=20, beta=0.3, J=1.0, h=1, iterations=100000, burn_frac=0.2, seed=123)
-    #temperature_scan(N=20, beta_min=0.1, beta_max=1.0, J=1.0, h=0.0, iterations=100000, seed=456)
-
-
-    
+    run_simulation(
+        N=20, beta=0.3, J=1.0, h=1, iterations=100000, burn_frac=0.2, seed=123
+    )
+    # temperature_scan(N=20, beta_min=0.1, beta_max=1.0, J=1.0, h=0.0, iterations=100000, seed=456)

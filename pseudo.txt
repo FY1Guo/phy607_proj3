@@ -1,0 +1,4 @@
+1. Ising Model Functions
+    a. Create grid from a 1-d list of length L^2
+    b. Compute grid's energy with nearest-neighbor interactions and external magnetic field
+    c. 
