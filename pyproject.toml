@@ -1,0 +1,25 @@
+[project]
+name = "PHY607_Project3_Guo_Matties_Raabith"
+version = "1.0.0"
+dependencies = [
+   "numpy",
+   "matplotlib",
+   "emcee"
+]
+authors = [
+  { name="Fangyi Guo", email="fguo10@syr.edu" },
+  { name="Carter Matties", email = "camattie@syr.edu"}
+  { name="Sadman Raabith", email="sraabith@syr.edu"}
+]
+description = "PHY607 Project 3"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.scripts]
+
+
