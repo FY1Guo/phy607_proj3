@@ -196,7 +196,7 @@ def temperature_scan(N, beta_min, beta_max, J=1.0, h=0.0, iterations=10000, emce
 
 
 if __name__ == "__main__":
-    run_simulation(N=50, beta=1.0, J=1.0, h=0.0, iterations=100000, burn_frac=0.2, seed=123)
+    run_simulation(N=20, beta=0.3, J=1.0, h=1, iterations=100000, burn_frac=0.2, seed=123)
     #temperature_scan(N=20, beta_min=0.1, beta_max=1.0, J=1.0, h=0.0, iterations=100000, seed=456)
 
 
