@@ -286,6 +286,31 @@ plt.tight_layout()
 plt.savefig('acf_plot.png', dpi=300, bbox_inches='tight')
 print("Saved: acf_plot.png")
 """
+
+print("\n" + "="*70)
+print("SUMMARY COMPARISON")
+print("="*70)
+print(f"{'Metric':<30} {'Metropolis':<20} {'emcee':<20}")
+print("-"*70)
+print(f"{'R-hat (Magnetization)':<30} {R_hat:<20.4f} {R_hat_emcee:<20.4f}")
+print(f"{'τ (Magnetization)':<30} {tau:<20.2f} {tau_emcee:<20.2f}")
+print(f"{'ESS (Magnetization)':<30} {ess:<20.0f} {ess_emcee:<20.0f}")
+print(f"{'Converged?':<30} {'Yes' if R_hat < 1.1 else 'No':<20} {'Yes' if R_hat_emcee < 1.1 else 'No':<20}")
+print("="*70)
+
+# Calculate mean magnetization post-burn-in
+burn_idx = int(iterations * burn_frac)
+mag_postburn_metro = mag_chains_array[:, burn_idx:]
+mag_postburn_emcee = mag_chains_emcee[:, burn_idx:]
+
+mean_mag_metro = np.mean(np.abs(mag_postburn_metro))
+mean_mag_emcee = np.mean(np.abs(mag_postburn_emcee))
+
+print(f"\nPosterior Estimates (post-burn-in):")
+print(f"  Metropolis <|m|>: {mean_mag_metro:.4f}")
+print(f"  emcee <|m|>:      {mean_mag_emcee:.4f}")
+print(f"  Difference:       {abs(mean_mag_metro - mean_mag_emcee):.4f} ({abs(mean_mag_metro - mean_mag_emcee)/mean_mag_metro*100:.2f}%)")
+
 print("\nCreating comparison plots")
 
 # side-by-side trace plots
@@ -319,7 +344,7 @@ plt.tight_layout()
 plt.savefig('trace_comparison.png', dpi=300, bbox_inches='tight')
 print("Saved: trace_comparison.png")
 
-# 2. side-by-side ACF plots
+# side-by-side ACF plots
 fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
 # metropolis ACF
@@ -354,3 +379,4 @@ print("Saved: acf_comparison.png")
 
 
 plt.show()
+
