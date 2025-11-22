@@ -21,7 +21,7 @@ def run_emcee(N_walkers, N_grid, J, h, beta = 1.0, seed = 123, steps = 20000):
     rng = np.random.default_rng(seed)
     
     N_spins = N_grid**2
-    initial_state = rng.uniform(low = -.1, high = .1, size = (N_walkers, N_spins))
+    initial_state = rng.uniform(low = -.01, high = .01, size = (N_walkers, N_spins))
     
     sampler = emcee.EnsembleSampler(N_walkers, N_spins, emcee_posterior, args = [J,h], kwargs = {"beta" : beta}, moves = emcee.moves.MHMove(MHMove_proposal))
     sampler.run_mcmc(initial_state, steps, skip_initial_state_check = True)
@@ -30,17 +30,19 @@ def run_emcee(N_walkers, N_grid, J, h, beta = 1.0, seed = 123, steps = 20000):
 if __name__ == "__main__":
     N_walkers = 20
     N_grid = 10
-    mcmc = run_emcee(N_walkers, N_grid, 1, 0, seed = None)
-    chain_array = mcmc.get_chain()
-    print(type(chain_array))
-    print(chain_array.shape)
-    chain_list = chain_array[10000:,:,:].flatten()
+    burn_in_steps = 5000
+    chain_steps = 100000
+    mcmc = run_emcee(N_walkers, N_grid, 1, .1, seed = None, steps = burn_in_steps + chain_steps)
+    chain_array = np.sign(mcmc.get_chain()[burn_in_steps:,:,:])
+    tau_emcee = emcee.autocorr.integrated_time(chain_array, quiet = False)
+    print(np.max(tau_emcee))
+    print(tau_emcee)
+
+    #print(f"ACL: {tau_direct_indep:.2f}")
+    #plt.figure()
+    #plt.hist(chain_list)
+    #plt.show()
     
-    plt.figure()
-    plt.hist(chain_list)
-    
-    plt.figure()
-    
-    plt.show()
+    chain_array = np.sign(chain_array)
     #print(np.max(chain_array))
     #print(np.min(chain_array))
